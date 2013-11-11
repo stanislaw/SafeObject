@@ -1,10 +1,9 @@
+// ThreadSafeKVCObject
 //
-//  ThreadSafeKVCObject.h
-//  aaah
+// ThreadSafeKVCObject/ThreadSafeKVCObject.h
 //
-//  Created by Stanislaw Pankevich on 10/11/13.
-//  Copyright (c) 2013 IProjecting. All rights reserved.
-//
+// Copyright (c) 2013 Stanislaw Pankevich
+// Released under the MIT license
 
 #import <Foundation/Foundation.h>
 #import <Mantle/Mantle.h>
