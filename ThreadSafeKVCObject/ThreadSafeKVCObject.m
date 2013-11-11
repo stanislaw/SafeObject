@@ -13,9 +13,10 @@
 @interface ThreadSafeKVCObject () {
     dispatch_queue_t _isolationQueue;
     NSUInteger _isolationHash;
+    NSMutableDictionary *_properties;
 }
 
-@property NSMutableDictionary *properties;
+- (NSMutableDictionary *)properties;
 
 - (void)_readAccess:(void (^)(id))accessBlock;
 - (void)_readWriteAccess:(void(^)(id))accessBlock;
@@ -34,7 +35,7 @@
 
     [self setIsolationQueue:dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_CONCURRENT)];
 
-    self.properties = [NSMutableDictionary new];
+    _properties = [NSMutableDictionary new];
     _isolationHash = NSNotFound;
 
     return self;
@@ -43,6 +44,10 @@
 - (void)dealloc {
     _properties = nil;
     [self setIsolationQueue:nil];
+}
+
+- (NSMutableDictionary *)properties {
+    return _properties;
 }
 
 #pragma mark
