@@ -168,11 +168,7 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
         accessBlock(self);
     } else {
         dispatch_barrier_sync(_isolationQueue, ^{
-            _isolationHash = [NSThread currentThread].hash;
-
             accessBlock(self);
-
-            _isolationHash = NSNotFound;
         });
     }
 }
@@ -182,11 +178,7 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
         accessBlock(self);
     } else {
         dispatch_barrier_async(_isolationQueue, ^{
-            _isolationHash = [NSThread currentThread].hash;
-
             accessBlock(self);
-
-            _isolationHash = NSNotFound;
         });
     }
 }
