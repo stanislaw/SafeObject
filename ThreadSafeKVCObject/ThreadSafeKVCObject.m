@@ -17,7 +17,6 @@
 - (NSMutableDictionary *)properties;
 
 - (void)_readAccess:(void (^)(id))accessBlock;
-- (void)_readWriteAccess:(void(^)(id))accessBlock;
 - (void)_writeAccess:(void(^)(id))accessBlock;
 
 @end
@@ -89,7 +88,13 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
     [key replaceCharactersInRange:NSMakeRange(0, 1) withString:[firstChar lowercaseString]];
 
     [self _writeAccess:^(id object) {
-        [[self properties] setValue:value forKey:key];
+        id oldValue = [self valueForKey:key];
+
+        if ([oldValue isEqual:value] == NO) {
+            [self willChangeValueForKey:key];
+            [[self properties] setValue:value forKey:key];
+            [self didChangeValueForKey:key];
+        }
     }];
 }
 
@@ -166,22 +171,16 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
     }
 }
 
-- (void)_readWriteAccess:(void(^)(id))accessBlock {
-    if ([[NSThread currentThread].threadDictionary valueForKey:ThreadSafeKVCObjectKey]) {
-        accessBlock(self);
-    } else {
-        dispatch_barrier_sync(_isolationQueue, ^{
-            accessBlock(self);
-        });
-    }
-}
-
 - (void)_writeAccess:(void(^)(id))accessBlock {
     if ([[NSThread currentThread].threadDictionary valueForKey:ThreadSafeKVCObjectKey]) {
         accessBlock(self);
     } else {
         dispatch_barrier_async(_isolationQueue, ^{
+            [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:ThreadSafeKVCObjectKey];
+
             accessBlock(self);
+
+            [[NSThread currentThread].threadDictionary setValue:nil forKey:ThreadSafeKVCObjectKey];
         });
     }
 }

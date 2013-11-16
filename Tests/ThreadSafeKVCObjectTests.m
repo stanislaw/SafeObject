@@ -27,7 +27,7 @@ describe(@"ThreadSafeKVCObject", ^{
     });
 
     describe(@"Transactional access", ^{
-        specify(^{
+        it(@"", ^{
             ThreadSafeClass *clazz = [ThreadSafeClass new];
 
             [clazz writeAccess:^(ThreadSafeClass *clazz) {
@@ -35,10 +35,16 @@ describe(@"ThreadSafeKVCObject", ^{
                 clazz.property2 = @(YES);
             }];
 
+            __block id property1value;
+            __block id property2value;
+
             [clazz readAccess:^(ThreadSafeClass *clazz) {
-                [[clazz.property1 should] equal:@"Blip!"];
-                [[clazz.property2 should] equal:@(YES)];
+                property1value = clazz.property1;
+                property2value = clazz.property2;
             }];
+
+            [[property1value should] equal:@"Blip!"];
+            [[property2value should] equal:@(YES)];
         });
     });
 });

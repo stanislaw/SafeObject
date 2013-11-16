@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5BEE524B35DD4952AA90DA3E /* libPods-TestsAppTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 946AF9EFFDC94337BA5D4E4A /* libPods-TestsAppTests.a */; };
 		5C9CA420FA104554909B1A10 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83E2444E2E4D4BB5BD25204C /* libPods.a */; };
+		8628313A18370194001ECE14 /* ThreadSafeKVCObject_KVO_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 86283138183700A1001ECE14 /* ThreadSafeKVCObject_KVO_Tests.m */; };
 		86D47A241830477B00EBDD6C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D47A231830477B00EBDD6C /* Foundation.framework */; };
 		86D47A261830477B00EBDD6C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D47A251830477B00EBDD6C /* CoreGraphics.framework */; };
 		86D47A281830477B00EBDD6C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D47A271830477B00EBDD6C /* UIKit.framework */; };
@@ -29,6 +30,7 @@
 /* Begin PBXFileReference section */
 		07C8878B49234ABE8A261EF2 /* Pods-TestsAppTests.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TestsAppTests.xcconfig"; path = "Pods/Pods-TestsAppTests.xcconfig"; sourceTree = "<group>"; };
 		83E2444E2E4D4BB5BD25204C /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		86283138183700A1001ECE14 /* ThreadSafeKVCObject_KVO_Tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ThreadSafeKVCObject_KVO_Tests.m; sourceTree = "<group>"; };
 		86D47A201830477B00EBDD6C /* TestsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		86D47A231830477B00EBDD6C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		86D47A251830477B00EBDD6C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -155,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				86D47A591830499400EBDD6C /* ThreadSafeKVCObjectTests.m */,
+				86283138183700A1001ECE14 /* ThreadSafeKVCObject_KVO_Tests.m */,
 			);
 			name = Tests;
 			path = ../Tests;
@@ -360,6 +363,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				86D47A7B18304B9600EBDD6C /* ThreadSafeKVCObject.m in Sources */,
+				8628313A18370194001ECE14 /* ThreadSafeKVCObject_KVO_Tests.m in Sources */,
 				86D47A76183049D600EBDD6C /* ThreadSafeKVCObjectTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
