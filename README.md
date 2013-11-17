@@ -1,5 +1,4 @@
-ThreadSafeKVCObject
-===================
+# SafeObject
 
 [Objective-C dynamic methods at runtime?](http://stackoverflow.com/questions/13645666/objective-c-dynamic-methods-at-runtime/13645915#13645915)
 

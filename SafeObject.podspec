@@ -1,5 +1,5 @@
 #
-#  Be sure to run `pod spec lint ThreadSafeKVCObject.podspec' to ensure this is a
+#  Be sure to run `pod spec lint SafeObject.podspec' to ensure this is a
 #  valid spec and to remove all comments including this before submitting the spec.
 #
 #  To learn more about Podspec attributes see http://docs.cocoapods.org/specification.html
@@ -15,12 +15,12 @@ Pod::Spec.new do |s|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  s.name         = "ThreadSafeKVCObject"
+  s.name         = "SafeObject"
   s.version      = "0.0.2"
-  s.summary      = "A short description of ThreadSafeKVCObject."
+  s.summary      = "A short description of SafeObject."
 
   s.description  = <<-DESC
-                   A longer description of ThreadSafeKVCObject in Markdown format.
+                   A longer description of SafeObject in Markdown format.
 
                    * Think: Why did you write this? What is the focus? What does it do?
                    * CocoaPods will be using this to generate tags, and improve search results.
@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
                    * Finally, don't worry about the indent, CocoaPods strips it!
                    DESC
 
-  # s.homepage     = "http://EXAMPLE/ThreadSafeKVCObject"
+  # s.homepage     = "http://EXAMPLE/SafeObject"
   # s.screenshots  = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
 
 
@@ -75,7 +75,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/stanislaw/ThreadSafeKVCObject.git", :tag => s.version.to_s }
+  s.source       = { :git => "https://github.com/stanislaw/SafeObject.git", :tag => s.version.to_s }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -86,7 +86,7 @@ Pod::Spec.new do |s|
   #  Not including the public_header_files will make all headers public.
   #
 
-  s.source_files  = 'ThreadSafeKVCObject', 'ThreadSafeKVCObject/**/*.{h,m}'
+  s.source_files  = 'SafeObject', 'SafeObject/**/*.{h,m}'
   # s.exclude_files = 'Classes/Exclude'
 
   # s.public_header_files = 'Classes/**/*.h'

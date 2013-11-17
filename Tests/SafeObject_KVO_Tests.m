@@ -1,7 +1,7 @@
-#import <Kiwi/Kiwi.h>
-#import "ThreadSafeKVCObject.h"
+#import <XCTest/XCTest.h>
+#import "SafeObject.h"
 
-@interface ThreadSafeKVOClass : ThreadSafeKVCObject
+@interface SafeObjectKVOTestClass : SafeObject
 
 @property NSString *property1;
 @property NSNumber *property2;
@@ -10,7 +10,7 @@
 
 @end
 
-@implementation ThreadSafeKVOClass
+@implementation SafeObjectKVOTestClass
 
 @dynamic property1,
          property2;
@@ -39,20 +39,21 @@
 
 @end
 
-SPEC_BEGIN(ThreadSafeKVCObject_KVO_Specs)
 
-describe(@"ThreadSafeKVCObject", ^{
-    describe(@"Properties", ^{
-        it(@"should dynamically synthesize properties implementations", ^{
-            ThreadSafeKVOClass *clazz = [ThreadSafeKVOClass new];
+@interface SafeObjectKVOTests : XCTestCase
 
-            [[theValue(clazz.observationWasMade) should] beNo];
+@end
 
-            clazz.property1 = @"Blip!";
+@implementation SafeObjectKVOTests
 
-            [[theValue(clazz.observationWasMade) should] beYes];
-        });
-    });
-});
+- (void)testKVO {
+    SafeObjectKVOTestClass *clazz = [SafeObjectKVOTestClass new];
 
-SPEC_END
+    XCTAssertFalse(clazz.observationWasMade, @"");
+
+    clazz.property1 = @"Blip!";
+
+    XCTAssertTrue(clazz.observationWasMade, @"");
+}
+
+@end
