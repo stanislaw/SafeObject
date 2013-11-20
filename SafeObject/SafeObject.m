@@ -12,16 +12,16 @@
 @interface SafeObject () {
     dispatch_queue_t _isolationQueue;
     NSMutableDictionary *_properties;
+    NSString *_safeObjectKey;
 }
 
 - (NSMutableDictionary *)properties;
+- (NSString *)safeObjectKey;
 
 - (void)_readAccess:(void (^)(id))accessBlock;
 - (void)_writeAccess:(void(^)(id))accessBlock;
 
 @end
-
-static NSString * const SafeObjectKey = @"SafeObjectKey";
 
 @implementation SafeObject
 
@@ -35,6 +35,7 @@ static NSString * const SafeObjectKey = @"SafeObjectKey";
     [self setIsolationQueue:dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_CONCURRENT)];
 
     _properties = [NSMutableDictionary new];
+    _safeObjectKey = [NSString stringWithFormat:@"SafeObjectKey%u", (NSUInteger)self];
 
     return self;
 }
@@ -46,6 +47,10 @@ static NSString * const SafeObjectKey = @"SafeObjectKey";
 
 - (NSMutableDictionary *)properties {
     return _properties;
+}
+
+- (NSString *)safeObjectKey {
+    return _safeObjectKey;
 }
 
 #pragma mark
@@ -127,31 +132,31 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
 
 - (void)readAccess:(void (^)(id))accessBlock {
     dispatch_sync(_isolationQueue, ^{
-        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:SafeObjectKey];
+        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:[self safeObjectKey]];
 
         accessBlock(self);
 
-        [[NSThread currentThread].threadDictionary setValue:nil forKey:SafeObjectKey];
+        [[NSThread currentThread].threadDictionary setValue:nil forKey:[self safeObjectKey]];
     });
 }
 
 - (void)readWriteAccess:(void(^)(id))accessBlock {
     dispatch_barrier_sync(_isolationQueue, ^{
-        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:SafeObjectKey];
+        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:[self safeObjectKey]];
 
         accessBlock(self);
 
-        [[NSThread currentThread].threadDictionary setValue:nil forKey:SafeObjectKey];
+        [[NSThread currentThread].threadDictionary setValue:nil forKey:[self safeObjectKey]];
     });
 }
 
 - (void)writeAccess:(void(^)(id))accessBlock {
     dispatch_barrier_async(_isolationQueue, ^{
-        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:SafeObjectKey];
+        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:[self safeObjectKey]];
 
         accessBlock(self);
 
-        [[NSThread currentThread].threadDictionary setValue:nil forKey:SafeObjectKey];
+        [[NSThread currentThread].threadDictionary setValue:nil forKey:[self safeObjectKey]];
     });
 }
 
@@ -159,7 +164,7 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
 #pragma mark Private API (level 0)
 
 - (void)_readAccess:(void (^)(id))accessBlock {
-    if ([[NSThread currentThread].threadDictionary valueForKey:SafeObjectKey]) {
+    if ([[NSThread currentThread].threadDictionary valueForKey:[self safeObjectKey]]) {
         accessBlock(self);
     } else {
         dispatch_sync(_isolationQueue, ^{
@@ -169,15 +174,15 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
 }
 
 - (void)_writeAccess:(void(^)(id))accessBlock {
-    if ([[NSThread currentThread].threadDictionary valueForKey:SafeObjectKey]) {
+    if ([[NSThread currentThread].threadDictionary valueForKey:[self safeObjectKey]]) {
         accessBlock(self);
     } else {
         dispatch_barrier_async(_isolationQueue, ^{
-            [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:SafeObjectKey];
+            [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:[self safeObjectKey]];
 
             accessBlock(self);
 
-            [[NSThread currentThread].threadDictionary setValue:nil forKey:SafeObjectKey];
+            [[NSThread currentThread].threadDictionary setValue:nil forKey:[self safeObjectKey]];
         });
     }
 }
