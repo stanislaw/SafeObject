@@ -101,28 +101,25 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
 + (BOOL)resolveInstanceMethod:(SEL)aSEL {
     NSMutableString *key = [NSStringFromSelector(aSEL) mutableCopy];
 
-    if ([NSStringFromSelector(aSEL) hasPrefix:@"set"]) {
-        // delete "set" and ":" and lowercase first letter
+    if ([key hasPrefix:@"set"] && [key hasSuffix:@":"]) {
         [key deleteCharactersInRange:NSMakeRange(0, 3)];
         [key deleteCharactersInRange:NSMakeRange([key length] - 1, 1)];
 
         NSString *firstChar = [key substringToIndex:1];
         [key replaceCharactersInRange:NSMakeRange(0, 1) withString:[firstChar lowercaseString]];
 
-        if ([[[self class] propertyKeys] containsObject:key] == NO) {
-            return NO;
+        if ([[[self class] propertyKeys] containsObject:key]) {
+            class_addMethod([self class], aSEL, (IMP)setPropertyIMP, "v@:@");
+            return YES;
         }
-
-        class_addMethod([self class], aSEL, (IMP)setPropertyIMP, "v@:@");
     } else {
-        if ([[[self class] propertyKeys] containsObject:key] == NO) {
-            return NO;
+        if ([[[self class] propertyKeys] containsObject:key]) {
+            class_addMethod([self class], aSEL,(IMP)propertyIMP, "@@:");
+            return YES;
         }
-
-        class_addMethod([self class], aSEL,(IMP)propertyIMP, "@@:");
     }
 
-    return YES;
+    return [super resolveInstanceMethod:aSEL];
 }
 
 #pragma mark
