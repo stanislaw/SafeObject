@@ -12,16 +12,13 @@
 @interface SafeObject () {
     dispatch_queue_t _isolationQueue;
     NSMutableDictionary *_properties;
-    NSString *_safeObjectKey;
 }
 
 - (NSMutableDictionary *)properties;
-- (NSString *)safeObjectKey;
-
-- (void)_readAccess:(void (^)(id))accessBlock;
-- (void)_writeAccess:(void(^)(id))accessBlock;
 
 @end
+
+static const void * const SafeObjectKey = &SafeObjectKey;
 
 @implementation SafeObject
 
@@ -32,10 +29,11 @@
 
     NSString *queueName = [NSString stringWithFormat:@"com.%@.isolationqueue", NSStringFromClass([self class])];
 
-    [self setIsolationQueue:dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_CONCURRENT)];
+    dispatch_queue_t isolationQueue = dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_CONCURRENT);
+    dispatch_queue_set_specific(isolationQueue, SafeObjectKey, (__bridge void *)(isolationQueue), NULL);
+    [self setIsolationQueue:isolationQueue];
 
     _properties = [NSMutableDictionary new];
-    _safeObjectKey = [NSString stringWithFormat:@"SafeObjectKey%u", (NSUInteger)self];
 
     return self;
 }
@@ -49,16 +47,14 @@
     return _properties;
 }
 
-- (NSString *)safeObjectKey {
-    return _safeObjectKey;
-}
-
 #pragma mark
 #pragma mark Isolation queue
 
 - (void)setIsolationQueue:(dispatch_queue_t)isolationQueue {
 #if !OS_OBJECT_USE_OBJC
-    if (_isolationQueue) dispatch_release(_isolationQueue);
+    if (_isolationQueue) {
+        dispatch_release(_isolationQueue);
+    }
 
     if (isolationQueue) {
         dispatch_retain(isolationQueue);
@@ -74,7 +70,7 @@
 static id propertyIMP(id self, SEL _cmd) {
     __block id value;
 
-    [self _readAccess:^(id object) {
+    [self readAccess:^(id object) {
         value = [[self properties] valueForKey:NSStringFromSelector(_cmd)];
     }];
 
@@ -92,7 +88,7 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
     NSString *firstChar = [key substringToIndex:1];
     [key replaceCharactersInRange:NSMakeRange(0, 1) withString:[firstChar lowercaseString]];
 
-    [self _writeAccess:^(id object) {
+    [self writeAccess:^(id object) {
         id oldValue = [self valueForKey:key];
 
         if ([oldValue isEqual:value] == NO) {
@@ -131,58 +127,37 @@ static void setPropertyIMP(id self, SEL _cmd, id aValue) {
 #pragma mark Public API: Transactional access
 
 - (void)readAccess:(void (^)(id))accessBlock {
-    dispatch_sync(_isolationQueue, ^{
-        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:[self safeObjectKey]];
-
+    if (dispatch_get_specific(SafeObjectKey) == (__bridge void *)(_isolationQueue)) {
         accessBlock(self);
+    }
 
-        [[NSThread currentThread].threadDictionary setValue:nil forKey:[self safeObjectKey]];
-    });
-}
-
-- (void)readWriteAccess:(void(^)(id))accessBlock {
-    dispatch_barrier_sync(_isolationQueue, ^{
-        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:[self safeObjectKey]];
-
-        accessBlock(self);
-
-        [[NSThread currentThread].threadDictionary setValue:nil forKey:[self safeObjectKey]];
-    });
-}
-
-- (void)writeAccess:(void(^)(id))accessBlock {
-    dispatch_barrier_async(_isolationQueue, ^{
-        [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:[self safeObjectKey]];
-
-        accessBlock(self);
-
-        [[NSThread currentThread].threadDictionary setValue:nil forKey:[self safeObjectKey]];
-    });
-}
-
-#pragma mark
-#pragma mark Private API (level 0)
-
-- (void)_readAccess:(void (^)(id))accessBlock {
-    if ([[NSThread currentThread].threadDictionary valueForKey:[self safeObjectKey]]) {
-        accessBlock(self);
-    } else {
+    else {
         dispatch_sync(_isolationQueue, ^{
             accessBlock(self);
         });
     }
 }
 
-- (void)_writeAccess:(void(^)(id))accessBlock {
-    if ([[NSThread currentThread].threadDictionary valueForKey:[self safeObjectKey]]) {
+- (void)readWriteAccess:(void(^)(id))accessBlock {
+    if (dispatch_get_specific(SafeObjectKey) == (__bridge void *)(_isolationQueue)) {
         accessBlock(self);
-    } else {
-        dispatch_barrier_async(_isolationQueue, ^{
-            [[NSThread currentThread].threadDictionary setValue:@(YES) forKey:[self safeObjectKey]];
+    }
 
+    else {
+        dispatch_barrier_sync(_isolationQueue, ^{
             accessBlock(self);
+        });
+    }
+}
 
-            [[NSThread currentThread].threadDictionary setValue:nil forKey:[self safeObjectKey]];
+- (void)writeAccess:(void(^)(id))accessBlock {
+    if (dispatch_get_specific(SafeObjectKey) == (__bridge void *)(_isolationQueue)) {
+        accessBlock(self);
+    }
+
+    else {
+        dispatch_barrier_async(_isolationQueue, ^{
+            accessBlock(self);
         });
     }
 }
