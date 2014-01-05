@@ -1,5 +1,10 @@
 
 platform :ios, '5.0'
+
+target :TestsApp do
+  pod 'Mantle'
+end
+
 target :TestsAppTests do
   pod 'Mantle'
   pod 'Kiwi'
