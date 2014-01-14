@@ -29,9 +29,8 @@ static const void * const SafeObjectKey = &SafeObjectKey;
 
     NSString *queueName = [NSString stringWithFormat:@"com.%@.isolationqueue", NSStringFromClass([self class])];
 
-    dispatch_queue_t isolationQueue = dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_CONCURRENT);
-    dispatch_queue_set_specific(isolationQueue, SafeObjectKey, (__bridge void *)(isolationQueue), NULL);
-    [self setIsolationQueue:isolationQueue];
+    _isolationQueue = dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_CONCURRENT);
+    dispatch_queue_set_specific(_isolationQueue, SafeObjectKey, (__bridge void *)(_isolationQueue), NULL);
 
     _properties = [NSMutableDictionary new];
 
@@ -40,28 +39,11 @@ static const void * const SafeObjectKey = &SafeObjectKey;
 
 - (void)dealloc {
     _properties = nil;
-    [self setIsolationQueue:nil];
+    _isolationQueue = nil;
 }
 
 - (NSMutableDictionary *)properties {
     return _properties;
-}
-
-#pragma mark
-#pragma mark Isolation queue
-
-- (void)setIsolationQueue:(dispatch_queue_t)isolationQueue {
-#if !OS_OBJECT_USE_OBJC
-    if (_isolationQueue) {
-        dispatch_release(_isolationQueue);
-    }
-
-    if (isolationQueue) {
-        dispatch_retain(isolationQueue);
-    }
-#endif
-
-    _isolationQueue = isolationQueue;
 }
 
 #pragma mark
